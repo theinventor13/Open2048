@@ -157,7 +157,7 @@ bool spawnnew(void){
 	
 	int spawn_x = 0;
 	int spawn_y = 0;
-	bool indexgood = true;
+	bool indexnotgood = true;
 	
 	while(indexnotgood){
 		spawn_x++;
@@ -173,5 +173,6 @@ bool spawnnew(void){
 	}
 	
 	grid[spawn_y][spawn_x] = 2;
+	return true;
 	
 };
