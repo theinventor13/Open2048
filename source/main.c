@@ -2,40 +2,43 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-size_t grid[4][4] = {
-{0,0,0,0},
-{0,0,0,0},
-{0,0,0,0},
-{0,0,0,0}};
+typedef struct{
+	size_t number;
+	bool merged;
+}tile;
+
+tile grid[4][4];
 
 enum shift{LEFT, RIGHT, UP, DOWN};
-
 bool step(int way);
 bool spawnnew(void);
 
 int main(void){
 	srand(time(0));
 	
-	putgrid(2, 0, 0);
-	putgrid(4, 1, 0);
-	putgrid(2, 2, 0);
-	putgrid(2, 3, 0);
+	putgrid(1, 0, 0);
+	putgrid(1, 1, 0);
+	putgrid(1, 2, 0);
+	putgrid(1, 3, 0);
 	
-	putgrid(2, 0, 1);
-	putgrid(4, 1, 1);
-	putgrid(4, 2, 1);
-	putgrid(2, 3, 1);
+	putgrid(1, 0, 1);
+	putgrid(1, 1, 1);
+	putgrid(1, 2, 1);
+	putgrid(1, 3, 1);
+
+	putgrid(1, 0, 2);
+	putgrid(1, 1, 2);
+	putgrid(1, 2, 2);
+	putgrid(1, 3, 2);
 	
-	putgrid(16, 0, 2);
-	putgrid(16, 1, 2);
-	putgrid(32, 2, 2);
-	putgrid(8, 3, 2);
+	putgrid(1, 0, 3);
+	putgrid(1, 1, 3);
+	putgrid(1, 2, 3);
+	putgrid(1, 3, 3);
 	
-	putgrid(4, 0, 3);
-	putgrid(4, 1, 3);
-	putgrid(2, 2, 3);
-	putgrid(8, 3, 3);
-	
+	printgrid();
+	step(RIGHT);
+	printf("\nshifted right:\n\n");
 	printgrid();
 	step(LEFT);
 	printf("\nshifted left:\n\n");
@@ -43,7 +46,9 @@ int main(void){
 	step(UP);
 	printf("\nshifted up:\n\n");
 	printgrid();
-	
+	step(DOWN);
+	printf("\nshifted down:\n\n");
+	printgrid();
 	return 0;
 }
 
@@ -55,16 +60,21 @@ bool step(int way){
 				while(eat){
 					eat = false;
 					for(int col = 3; col >= 1; col--){
-						if(grid[row][col] == 0){
-							if(grid[row][col-1] > 0){
-								grid[row][col] = grid[row][col-1];
-								grid[row][col-1] = 0;
+						if(grid[row][col].number == 0){
+							if(grid[row][col-1].number > 0){
+								grid[row][col].number = grid[row][col-1].number;
+								grid[row][col].merged = grid[row][col-1].merged;
+								grid[row][col-1].merged = false;
+								grid[row][col-1].number = 0;
 								eat = true;
 							}
-						}else if(grid[row][col] == grid[row][col-1]){
-							grid[row][col-1] = 0;
-							grid[row][col] += grid[row][col];
-							eat = true;
+						}else if(grid[row][col].number == grid[row][col-1].number){
+							if(!(grid[row][col].merged | grid[row][col-1].merged)){
+								grid[row][col-1].number = 0;
+								grid[row][col].number++;
+								grid[row][col].merged = true;
+								eat = true;	
+							}
 						}
 					}
 				}
@@ -76,16 +86,21 @@ bool step(int way){
 				while(eat){
 					eat = false;
 					for(int row = 3; row >= 1; row--){
-						if(grid[row][col] == 0){
-							if(grid[row-1][col] > 0){
-								grid[row][col] = grid[row-1][col];
-								grid[row-1][col] = 0;
+						if(grid[row][col].number == 0){
+							if(grid[row-1][col].number > 0){
+								grid[row][col].number = grid[row-1][col].number;
+								grid[row][col].merged = grid[row-1][col].merged;
+								grid[row-1][col].merged = false;
+								grid[row-1][col].number = 0;
 								eat = true;
 							}
-						}else if(grid[row][col] == grid[row-1][col]){
-							grid[row-1][col] = 0;
-							grid[row][col] += grid[row][col];
-							eat = true;
+						}else if(grid[row][col].number == grid[row-1][col].number){
+							if(!(grid[row][col].merged | grid[row-1][col].merged)){
+								grid[row-1][col].number = 0;
+								grid[row][col].number++;
+								grid[row][col].merged = true;
+								eat = true;	
+							}
 						}
 					}
 				}
@@ -97,16 +112,21 @@ bool step(int way){
 				while(eat){
 					eat = false;
 					for(int col = 0; col <= 2; col++){
-						if(grid[row][col] == 0){
-							if(grid[row][col+1] > 0){
-								grid[row][col] = grid[row][col+1];
-								grid[row][col+1] = 0;
+						if(grid[row][col].number == 0){
+							if(grid[row][col+1].number > 0){
+								grid[row][col].number = grid[row][col+1].number;
+								grid[row][col].merged = grid[row][col+1].merged;
+								grid[row][col+1].merged = false;
+								grid[row][col+1].number = 0;
 								eat = true;
 							}
-						}else if(grid[row][col] == grid[row][col+1]){
-							grid[row][col+1] = 0;
-							grid[row][col] += grid[row][col];
-							eat = true;
+						}else if(grid[row][col].number == grid[row][col+1].number){
+							if(!(grid[row][col].merged | grid[row][col+1].merged)){
+								grid[row][col+1].number = 0;
+								grid[row][col].number++;
+								grid[row][col].merged = true;
+								eat = true;	
+							}
 						}
 					}
 				}
@@ -118,16 +138,21 @@ bool step(int way){
 				while(eat){
 					eat = false;
 					for(int row = 0; row <= 2; row++){
-						if(grid[row][col] == 0){
-							if(grid[row+1][col] > 0){
-								grid[row][col] = grid[row+1][col];
-								grid[row+1][col] = 0;
+						if(grid[row][col].number == 0){
+							if(grid[row+1][col].number > 0){
+								grid[row][col].number = grid[row+1][col].number;
+								grid[row][col].merged = grid[row+1][col].merged;
+								grid[row+1][col].merged = false;
+								grid[row+1][col].number = 0;
 								eat = true;
 							}
-						}else if(grid[row][col] == grid[row+1][col]){
-							grid[row+1][col] = 0;
-							grid[row][col] += grid[row][col];
-							eat = true;
+						}else if(grid[row][col].number == grid[row+1][col].number){
+							if(!(grid[row][col].merged | grid[row+1][col].merged)){
+								grid[row+1][col].number = 0;
+								grid[row][col].number++;
+								grid[row][col].merged = true;
+								eat = true;	
+							}
 						}
 					}
 				}
@@ -137,20 +162,34 @@ bool step(int way){
 		default:
 			break;
 	}
+	
+	
+	for(int col = 0; col < 4; col++){
+		for(int row = 0; row < 4; row++){
+			grid[row][col].merged = false;
+		}
+	}
+			
 	return true;
 }
 
 void printgrid(void){
 	for(int y = 0; y < 4; y++){
 		for(int x = 0; x < 4; x++){
-			printf("%i \t",grid[y][x]);
+			if(grid[y][x].number){
+				printf("%i\t", 1 << grid[y][x].number);
+			}else{
+				printf("0\t");
+			}
+			
 		}
 		printf("\n\n");
 	}
 }
 
 void putgrid(size_t num, int x, int y){
-	grid[y][x] = num;
+	grid[y][x].number = num;
+	grid[y][x].merged = false;
 }
 
 bool spawnnew(void){
@@ -169,10 +208,10 @@ bool spawnnew(void){
 				return false;
 			}
 		}
-		indexnotgood = grid[spawn_y][spawn_x];
+		indexnotgood = grid[spawn_y][spawn_x].number;
 	}
 	
-	grid[spawn_y][spawn_x] = 2;
+	grid[spawn_y][spawn_x].number = 1;
 	return true;
 	
 };
