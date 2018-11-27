@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2\SDL.h>
-#define defaultcols 4
-#define defaultrows 4
+#define defaultcols 10
+#define defaultrows 10
 typedef struct{
 	size_t number;
 	bool merged;
@@ -22,7 +22,7 @@ SDL_Color clearcolor;
 SDL_Surface * picture; 
 size_t gridcols = defaultcols;
 size_t gridrows = defaultrows;
-tile grid[defaultcols][defaultcols];
+tile ** grid;
 SDL_Texture * numbers[12];
 char filelist[12][17] = {
 "numbers/0.bmp   ",
@@ -43,6 +43,25 @@ size_t screenwidth = 800;
 size_t screenheight = 800;
 bool quit = false;
 void loop(void);
+
+void makegrid(size_t sizey, size_t sizex){
+	
+
+	grid = (tile **)malloc(sizeof(tile *)*sizey);
+	for(size_t iter = 0; iter < sizey;iter++){
+		grid[iter] = (tile *)malloc(sizeof(tile)*sizex);
+	}
+	
+	for(int y = 0; y < gridcols; y++){
+		for(int x = 0; x < gridrows; x++){
+			grid[y][x].number = 0;
+			grid[y][x].merged = false;
+			grid[y][x].image = numbers[0];
+		}
+	}
+	adjusttilescale();
+	
+}
 
 int main(int argc, char ** argv){
 
@@ -74,12 +93,7 @@ int main(int argc, char ** argv){
 			return 1;
 		}
 	}
-		
-	for(int y = 0; y < gridcols; y++){
-		for(int x = 0; x < gridrows; x++){
-				grid[y][x].image = numbers[0];
-		}
-	}
+	makegrid(defaultcols, defaultrows);
 	adjusttilescale();
 	setclearcolor(255,255,255);
 	spawnnew();
