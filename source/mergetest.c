@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2\SDL.h>
-
+#define defaultcols 4
+#define defaultrows 4
 typedef struct{
 	size_t number;
 	bool merged;
@@ -19,8 +20,9 @@ SDL_Renderer * renderer;
 SDL_Event event;
 SDL_Color clearcolor;
 SDL_Surface * picture; 
-
-tile grid[4][4];
+size_t gridcols = defaultcols;
+size_t gridrows = defaultrows;
+tile grid[defaultcols][defaultcols];
 SDL_Texture * numbers[12];
 char filelist[12][17] = {
 "numbers/0.bmp   ",
@@ -37,8 +39,8 @@ char filelist[12][17] = {
 "numbers/2048.bmp"
 };
 
-size_t screenwidth = 640;
-size_t screenheight = 480;
+size_t screenwidth = 800;
+size_t screenheight = 800;
 bool quit = false;
 void loop(void);
 
@@ -73,8 +75,8 @@ int main(int argc, char ** argv){
 		}
 	}
 		
-	for(int y = 0; y < 4; y++){
-		for(int x = 0; x < 4; x++){
+	for(int y = 0; y < gridcols; y++){
+		for(int x = 0; x < gridrows; x++){
 				grid[y][x].image = numbers[0];
 		}
 	}
@@ -165,19 +167,19 @@ void flip(void){
 }
 
 void adjusttilescale(void){
-	for(int y = 0; y < 4; y++){
-		for(int x = 0; x < 4; x++){
-				grid[y][x].drawto.x = x * (screenwidth >> 2);
-				grid[y][x].drawto.y = y * (screenheight >> 2);
-				grid[y][x].drawto.w = screenwidth >> 2;
-				grid[y][x].drawto.h = screenheight >> 2;
+	for(int y = 0; y < gridcols; y++){
+		for(int x = 0; x < gridrows; x++){
+				grid[y][x].drawto.x = x * (screenwidth / gridcols);
+				grid[y][x].drawto.y = y * (screenheight / gridrows);
+				grid[y][x].drawto.w = screenwidth / gridcols;
+				grid[y][x].drawto.h = screenheight / gridrows;
 		}
 	}
 }
 
 void drawgrid(void){
-	for(int y = 0; y < 4; y++){
-		for(int x = 0; x < 4; x++){
+	for(int y = 0; y < gridcols; y++){
+		for(int x = 0; x < gridrows; x++){
 			SDL_RenderCopy(renderer, grid[y][x].image, NULL, &(grid[y][x].drawto));
 		}
 	}
@@ -187,10 +189,10 @@ bool step(int way){
 	bool eat = true;
 	switch(way){
 		case RIGHT:
-			for(int row = 0; row < 4; row++){
+			for(int row = 0; row < gridrows; row++){
 				while(eat){
 					eat = false;
-					for(int col = 3; col >= 1; col--){
+					for(int col = gridcols-1; col >= 1; col--){
 						if(grid[row][col].number == 0){
 							if(grid[row][col-1].number > 0){
 								grid[row][col].number = grid[row][col-1].number;
@@ -213,10 +215,10 @@ bool step(int way){
 			}
 			break;
 		case DOWN:
-			for(int col = 0; col < 4; col++){
+			for(int col = 0; col < gridcols; col++){
 				while(eat){
 					eat = false;
-					for(int row = 3; row >= 1; row--){
+					for(int row = gridrows-1; row >= 1; row--){
 						if(grid[row][col].number == 0){
 							if(grid[row-1][col].number > 0){
 								grid[row][col].number = grid[row-1][col].number;
@@ -239,10 +241,10 @@ bool step(int way){
 			}
 			break;
 		case LEFT:
-			for(int row = 0; row < 4; row++){
+			for(int row = 0; row < gridrows; row++){
 				while(eat){
 					eat = false;
-					for(int col = 0; col <= 2; col++){
+					for(int col = 0; col <= gridcols-2; col++){
 						if(grid[row][col].number == 0){
 							if(grid[row][col+1].number > 0){
 								grid[row][col].number = grid[row][col+1].number;
@@ -265,10 +267,10 @@ bool step(int way){
 			}
 			break;
 		case UP: 
-			for(int col = 0; col < 4; col++){
+			for(int col = 0; col < gridcols; col++){
 				while(eat){
 					eat = false;
-					for(int row = 0; row <= 2; row++){
+					for(int row = 0; row <= gridrows-2; row++){
 						if(grid[row][col].number == 0){
 							if(grid[row+1][col].number > 0){
 								grid[row][col].number = grid[row+1][col].number;
@@ -306,8 +308,8 @@ bool step(int way){
 }
 
 void updategrid(void){
-	for(int col = 0; col < 4; col++){
-		for(int row = 0; row < 4; row++){
+	for(int col = 0; col < gridcols; col++){
+		for(int row = 0; row < gridrows; row++){
 			grid[row][col].merged = false;
 			grid[row][col].image = numbers[grid[row][col].number];
 		}
@@ -315,8 +317,8 @@ void updategrid(void){
 }
 
 void printgrid(void){
-	for(int y = 0; y < 4; y++){
-		for(int x = 0; x < 4; x++){
+	for(int y = 0; y < gridcols; y++){
+		for(int x = 0; x < gridrows; x++){
 			if(grid[y][x].number){
 				printf("%i\t", 1 << grid[y][x].number);
 			}else{
@@ -339,8 +341,8 @@ bool spawnnew(void){
 	int spawn_y;
 	int spawn_x;
 	
-	for(spawn_y = 0;spawn_y < 4;spawn_y++){
-		for(spawn_x = 0;spawn_x < 4;spawn_x++){
+	for(spawn_y = 0;spawn_y < gridcols;spawn_y++){
+		for(spawn_x = 0;spawn_x < gridrows;spawn_x++){
 			indexnotgood = grid[spawn_y][spawn_x].number;
 			if(!indexnotgood){
 				break;
