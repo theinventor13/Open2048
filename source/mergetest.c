@@ -98,6 +98,7 @@ int main(int argc, char ** argv){
 	setclearcolor(255,255,255);
 	spawnnew();
 	spawnnew();
+	
 	while(!quit){
 		while(SDL_PollEvent(&event)){
 			if(event.type == SDL_WINDOWEVENT){
@@ -112,28 +113,26 @@ int main(int argc, char ** argv){
 						break;
 				}
 			}else if(event.type == SDL_KEYDOWN){
-				switch(event.key.keysym.sym){
-					case SDLK_UP:
-						currentshift = UP;
-						break;
-					case SDLK_DOWN:
-						currentshift = DOWN;
-						break;
-					case SDLK_RIGHT:
-						currentshift = RIGHT;
-						break;
-					case SDLK_LEFT:
-						currentshift = LEFT;
-						break;
-					default: 
-						break;
+				if(!gameover){
+					switch(event.key.keysym.sym){
+						case SDLK_UP:
+							gameover = step(UP);
+							break;
+						case SDLK_DOWN:
+							gameover = step(DOWN);
+							break;
+						case SDLK_RIGHT:
+							gameover = step(RIGHT);
+							break;
+						case SDLK_LEFT:
+							gameover = step(LEFT);
+							break;
+						default: 
+							break;
+					}
 				}
 			}
 		}
-		if(!quit){
-			quit = !step(currentshift);
-		}
-		
 		loop();
 		currentshift = NOTHING;
 	}
@@ -219,6 +218,10 @@ bool step(int way){
 							if(!(grid[row][col].merged | grid[row][col-1].merged)){
 								grid[row][col-1].number = 0;
 								grid[row][col].number++;
+								if(number == 11){
+									gameover = true;
+									strcpy(endmessage, "YOU WIN");
+								}
 								grid[row][col].merged = true;
 								eat = true;	
 							}
@@ -310,14 +313,12 @@ bool step(int way){
 			break;
 	}
 	
-	bool spawned;
+	updategrid();
+	bool cancontinue;
 	if(way != NOTHING){
-		spawned = spawnnew();
-		if(!spawned){
-			return false;
-		}
+		cancontinue = addtile() || canmakemove;
+		return cancontinue;
 	}
-	updategrid();	
 	return true;
 }
 
@@ -349,7 +350,7 @@ void putgrid(size_t num, int x, int y){
 	grid[y][x].merged = false;
 }
 
-bool spawnnew(void){
+bool addtile(void){
 	
 	size_t indexnotgood = false;
 	int spawn_y;
