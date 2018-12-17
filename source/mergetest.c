@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2\SDL.h>
-#define defaultcols 8
-#define defaultrows 8
+#define defaultcols 10
+#define defaultrows 10
 typedef struct{
 	size_t number;
 	bool merged;
@@ -39,8 +39,8 @@ char filelist[12][17] = {
 "numbers/2048.bmp"
 };
 
-size_t screenwidth = 600;
-size_t screenheight = 600;
+size_t screenwidth = 800;
+size_t screenheight = 800;
 bool quit = false;
 void loop(void);
 
